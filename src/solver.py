@@ -15,10 +15,10 @@ class Solver:
         self.game_board = game_board
         self.swaps = []
 
-    def solve_puzzle(self) -> list[tuple[board.Piece, board.Piece]]:
+    def solve_puzzle(self, display_lerp: bool = False) -> list[tuple[board.Piece, board.Piece]]:
         while not self.game_board.is_solved:
             for piece in self.game_board.floating_pieces:
-                new_piece = self.solve_one_piece(piece, display=True)
+                new_piece = self.solve_one_piece(piece, display=display_lerp)
                 if piece != new_piece:
                     self.swaps.append((piece.pos, new_piece.pos))
                 piece.verified = True
@@ -58,14 +58,14 @@ class Solver:
 
 
 def main():
-    filename = pathlib.Path('../imgs/confusion_7_003.png')
+    filename = pathlib.Path('../imgs/dreaming_7_001.png')
     game_board = board.Board(filename)
     solver = Solver(game_board)
     print(f'Found {len(game_board.pieces)} pieces, {len([piece for piece in game_board.pieces if piece.is_anchor])}'
           f' of which are anchors.')
     # game_board.display()
     # solver.solve_one_piece(np.random.choice(game_board.floating_pieces, 1)[0], display=True)
-    swaps = solver.solve_puzzle()
+    swaps = solver.solve_puzzle(display_lerp=True)
     print(len(swaps))
     print('\n'.join([f'{original_pos} -> {new_pos}' for original_pos, new_pos in swaps]))
     for swap in swaps:

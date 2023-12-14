@@ -56,6 +56,34 @@ def draw_lerped_pieces(img: np.array, line,
     return img
 
 
+def draw_lerped_pieces_from_points(img: np.array, point_a, point_b,
+                                   color_a, color_b,
+                                   start_t: float, end_t: float, num_between: int) -> np.array:
+    def lerp_color(color_a: Color, color_b: Color, t_: float) -> tuple[int, ...]:
+        return tuple([int(lerp(a, b, t_)) for a, b in zip(color_a, color_b)])
+
+    def lerp(a: float, b: float, t_: float) -> float:
+        return a * (1 - t_) + b * t_
+
+    x_1, y_1 = int(point_a[0]), int(point_a[1])
+    x_2, y_2 = int(point_b[0]), int(point_b[1])
+
+    c_1, c_2 = color_a, color_b
+
+    step = (end_t - start_t) / num_between
+
+    for t in np.arange(start_t, end_t + step, step):
+        x = lerp(x_1, x_2, t)
+        y = lerp(y_1, y_2, t)
+        color = lerp_color(c_1, c_2, t)
+        cv2.circle(img, (int(x), int(y)), 20, color, -1)
+
+        cv2.circle(img, (int(x), int(y)), 22, (255, 255, 255), 2)
+    cv2.circle(img, (x_1, y_1), 10, (0, 0, 0), -1)
+    cv2.circle(img, (x_2, y_2), 10, (0, 0, 0), -1)
+    return img
+
+
 def plot_point(img: np.array, x: int, y: int, color: tuple[int, int, int] = None, size: int = 12) -> np.array:
     img = img.copy()
     cv2.circle(img, (x, y), size, color, -1)

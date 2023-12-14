@@ -26,7 +26,7 @@ class Piece:
     verified: bool = False
 
     def __eq__(self, other: Self) -> bool:
-        return self.center.x == other.center.x and self.center.y - other.center.y
+        return self.center.x == other.center.x and self.center.y == other.center.y
 
     @cached_property
     def area(self):
@@ -115,6 +115,7 @@ class Board:
     def initialize_pieces(self) -> list[Piece]:
         logging.info('Initializing pieces...')
         contours = vision_utils.find_contours(self.original_img)
+        anchors = vision_utils.find_anchors(self.original_img)
         pieces = []
         for contour in contours:
             (x, y), radius = cv2.minEnclosingCircle(contour)
@@ -123,12 +124,14 @@ class Board:
                 continue
 
             color = self.original_img[int(y), int(x), :]
-            is_anchor = all(channel == 0 for channel in color)
+            # TODO: could optimize this line
+            anchor = next((anchor for anchor in anchors
+                          if cv2.pointPolygonTest(contour, (anchor.x, anchor.y), False) == 1), None)
 
-            if is_anchor:
+            if anchor:
                 # grab color offset by bubble
                 color = self.original_img[int(y) + 12, int(x), :]
-            new_piece = Piece(center=Point(int(x), int(y)), color=color, is_anchor=is_anchor, contour=contour)
+            new_piece = Piece(center=Point(int(x), int(y)), color=color, is_anchor=anchor is not None, contour=contour)
             if new_piece not in pieces:
                 pieces.append(new_piece)
         return pieces
@@ -183,7 +186,7 @@ class Board:
 
     def draw_basis_pieces(self, img: np.array, line: LinePieces, num_points: int) -> np.array:
         img = img.copy()
-        img = img_utils.draw_lerped_pieces(img, line, -3, 4, num_points)
+        img = img_utils.draw_lerped_pieces(img, line, 0, 1, num_points)
         return img
 
     def draw_solving_mechanism(self, img: np.array, point: tuple,
@@ -194,9 +197,20 @@ class Board:
         # print(result)
         # print('-' * 30)
         for basis_line in basis_pieces:
-            img = self.draw_basis_pieces(img, basis_line, 75)
+            img = self.draw_basis_pieces(img, basis_line, 20)
         p1, p2 = basis_pieces[0].t_to_point(t1), basis_pieces[1].t_to_point(t2)
-        img = img_utils.draw_line(img, *p1, *p2, 100)
+        # img = img_utils.draw_line(img, *p1, *p2, 100)
+
+        def lerp_color(color_a: Color, color_b: Color, t_: float) -> tuple[int, ...]:
+            return tuple([int(lerp(a, b, t_)) for a, b in zip(color_a, color_b)])
+
+        def lerp(a: float, b: float, t_: float) -> float:
+            return a * (1 - t_) + b * t_
+
+        c1 = lerp_color(basis_pieces[0].pieces[0].color, basis_pieces[0].pieces[1].color, t1)
+        c2 = lerp_color(basis_pieces[1].pieces[0].color, basis_pieces[1].pieces[1].color, t2)
+
+        img = img_utils.draw_lerped_pieces_from_points(img, p1, p2, c1, c2, 0, 1, 10)
         img = img_utils.plot_point(img, *point)
         return img
 

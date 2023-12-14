@@ -100,12 +100,12 @@ def main():
     img = img_utils.load_img(filename)
     contours = find_contours(img)
     img_utils.display_img(cv2.drawContours(img, contours, -1, (255, 0, 0), 3))
-    # anchors = find_anchors(img)
-    #
-    # assign_colors_to_anchors(img, anchors)
-    # for anchor in anchors:
-    #     print(anchor)
-    # img_utils.display_img(img_utils.apply_anchors(img, anchors, color=(0, 0, 255)))
+    anchors = find_anchors(img)
+
+    assign_colors_to_anchors(img, anchors)
+    for anchor in anchors:
+        print(anchor)
+    img_utils.display_img(img_utils.apply_anchors(img, anchors, color=(0, 0, 255)))
 
 
 if __name__ == '__main__':
