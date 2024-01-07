@@ -63,7 +63,7 @@ def optimal_lerp_line(line_a, line_b, x: int, y: int) -> tuple[tuple[float, floa
         return ((y_b - y_a) / (x_b - x_a)) * (x - x_b) + y_b - y
 
     parameters0 = np.array([0, 0])
-    bounds = [(-1, 2), (-1, 2)]
+    bounds = [(None, None), (None, None)]
 
     constraints = {'type': 'eq', 'fun': constraint_function}
 

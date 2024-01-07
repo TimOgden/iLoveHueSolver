@@ -238,8 +238,12 @@ class Board:
         c_x_y = tuple(int(lerp(channel_a, channel_b, t_x_y)) for channel_a, channel_b in zip(c1, c2))
         return c_x_y, basis_lines
 
-    def closest_colored_piece(self, color: tuple[int, int, int]) -> Piece:
-        pieces_to_consider = self.floating_pieces
+    def closest_colored_piece(self, original_piece: Piece, color: tuple[int, int, int],
+                              area_threshold: float = 1000) -> Piece:
+        pieces_to_consider = list(self.floating_pieces)
+        pieces_to_consider = [piece for piece in pieces_to_consider
+                              if abs(cv2.contourArea(piece.contour) - cv2.contourArea(original_piece.contour))
+                              <= area_threshold]
         return min(pieces_to_consider, key=lambda x: np.mean(np.abs(x.color - color)))
 
     def screen_coordinate_to_color(self, x: int, y: int):

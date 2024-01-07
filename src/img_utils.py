@@ -79,8 +79,8 @@ def draw_lerped_pieces_from_points(img: np.array, point_a, point_b,
         cv2.circle(img, (int(x), int(y)), 20, color, -1)
 
         cv2.circle(img, (int(x), int(y)), 22, (255, 255, 255), 2)
-    cv2.circle(img, (x_1, y_1), 10, (0, 0, 0), -1)
-    cv2.circle(img, (x_2, y_2), 10, (0, 0, 0), -1)
+    # cv2.circle(img, (x_1, y_1), 10, (0, 0, 0), -1)
+    # cv2.circle(img, (x_2, y_2), 10, (0, 0, 0), -1)
     return img
 
 
